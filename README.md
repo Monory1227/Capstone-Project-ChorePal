@@ -7,6 +7,7 @@ Description: This repository contains the Sprint 0 setup and documentation for o
 Sprint 0 Goal: Domain familiarization, tool setup, and requirements gathering.
 
 Class details: 
+    
     Professor: Professor Diana Rabah
     TA: Jordan Christopher Black
 
