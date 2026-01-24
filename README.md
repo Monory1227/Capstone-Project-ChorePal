@@ -2,7 +2,8 @@ Title: Capstone-Project-4901 (ChorePal)
 
 Team: The Cowboys 
 
-Description: This repository contains the Sprint 0 setup and documentation for our capstone project.
+Description: 
+ChorePal is a mobile application designed to help parents teach their kids the value of responsibility and hard work by assigning chores and rewarding them with payment upon completion. The app aims to provide a platform for kids to manage their chores, track their progress, and earn money for their efforts. This repository contains the documentation for our capstone project.
 
 Sprint 0 Goal: Domain familiarization, tool setup, and requirements gathering.
 
