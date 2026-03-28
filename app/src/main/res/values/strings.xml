@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">ChorePalCowboysG6</string>
+    <string name="create_chore">Create Chore</string>
+    <string name="view_chores">View Chores</string>
+    <string name="complete_chore">Complete Chore</string>
+    <string name="approve_chore">Approve Chore</string>
+
+    <string name="parent_dashboard">Parent Dashboard</string>
+    <string name="child_dashboard">Child Dashboard</string>
+
+    <string name="rewards">Rewards</string>
+    <string name="notifications">Notifications</string>
+
+    <string name="upload_proof">Upload Proof</string>
 </resources>
