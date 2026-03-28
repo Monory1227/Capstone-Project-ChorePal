@@ -54,9 +54,11 @@ The application follows a client-server architecture:
 
 ---
 
+
 ## 📱 Platform
-- Android Mobile Application (Primary)
-- iOS version (future scope)
+ChorePal is currently being developed as an Android mobile application using Kotlin.
+
+Future versions of the application may include iOS support as part of extended development.
 
 ---
 
