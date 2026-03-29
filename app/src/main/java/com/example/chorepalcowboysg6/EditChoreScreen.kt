@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,20 +43,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun CreateChoreScreen(
+fun EditChoreScreen(
+    chore: ChoreRow?,
     childOptions: List<ChildOption>,
     onSave: (String, String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
-    onLogout: () -> Unit,
-    onCancel: () -> Unit
+    onLogout: () -> Unit
 ) {
-    var choreTitle by rememberSaveable { mutableStateOf("") }
-    var description by rememberSaveable { mutableStateOf("") }
-    var dueDate by rememberSaveable { mutableStateOf("") }
-    var rewardAmount by rememberSaveable { mutableStateOf("") }
-    var assignedChildUid by rememberSaveable { mutableStateOf("") }
-    var assignedChildName by rememberSaveable { mutableStateOf("") }
+    var title by rememberSaveable(chore?.id) { mutableStateOf(chore?.title.orEmpty()) }
+    var description by rememberSaveable(chore?.id) { mutableStateOf(chore?.description.orEmpty()) }
+    var dueDate by rememberSaveable(chore?.id) { mutableStateOf(chore?.dueDate.orEmpty()) }
+    var rewardAmount by rememberSaveable(chore?.id) { mutableStateOf(chore?.rewardAmount.orEmpty()) }
+    var assignedChildUid by rememberSaveable(chore?.id) { mutableStateOf(chore?.assignedChildUid.orEmpty()) }
+    var assignedChildName by rememberSaveable(chore?.id) { mutableStateOf(chore?.assignedChildName.orEmpty()) }
     var expanded by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(chore?.id) {
+        title = chore?.title.orEmpty()
+        description = chore?.description.orEmpty()
+        dueDate = chore?.dueDate.orEmpty()
+        rewardAmount = chore?.rewardAmount.orEmpty()
+        assignedChildUid = chore?.assignedChildUid.orEmpty()
+        assignedChildName = chore?.assignedChildName.orEmpty()
+    }
 
     val black = Color.Black
     val white = Color.White
@@ -69,7 +79,7 @@ fun CreateChoreScreen(
     )
 
     val canSave =
-        choreTitle.isNotBlank() &&
+        title.isNotBlank() &&
                 description.isNotBlank() &&
                 dueDate.isNotBlank() &&
                 rewardAmount.isNotBlank() &&
@@ -129,7 +139,7 @@ fun CreateChoreScreen(
                     .padding(bottom = 18.dp)
             ) {
                 Text(
-                    text = "Create New Chore",
+                    text = "Edit Chore",
                     fontSize = 20.sp,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
@@ -137,8 +147,8 @@ fun CreateChoreScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
-                    value = choreTitle,
-                    onValueChange = { choreTitle = it },
+                    value = title,
+                    onValueChange = { title = it },
                     label = { Text("Chore Title") },
                     singleLine = true,
                     colors = fieldColors,
@@ -230,7 +240,7 @@ fun CreateChoreScreen(
                 Button(
                     onClick = {
                         onSave(
-                            choreTitle.trim(),
+                            title.trim(),
                             description.trim(),
                             dueDate.trim(),
                             rewardAmount.trim(),
@@ -241,19 +251,17 @@ fun CreateChoreScreen(
                     enabled = canSave,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = black,
-                        contentColor = white,
-                        disabledContainerColor = black.copy(alpha = 0.5f),
-                        disabledContentColor = white
+                        contentColor = white
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Save")
+                    Text("Save Changes")
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = onCancel,
+                    onClick = onBack,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = black),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -263,5 +271,4 @@ fun CreateChoreScreen(
         }
     }
 }
-
 

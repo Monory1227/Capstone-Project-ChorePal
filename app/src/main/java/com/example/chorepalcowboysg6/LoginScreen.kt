@@ -1,179 +1,165 @@
 package com.example.chorepalcowboysg6
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.*
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun LoginScreen(
-    onLogin: (username: String, password: String) -> Unit,
+    onLogin: (String, String) -> Unit,
     onForgotCredentials: () -> Unit,
-    onRegister: () -> Unit
+    onRegister: () -> Unit,
+    errorMessage: String? = null
 ) {
-    var username by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
-    var showPassword by rememberSaveable { mutableStateOf(false) }
 
     val black = Color.Black
     val white = Color.White
 
-    val trimmedUsername = username.trim()
-    val canSubmit = trimmedUsername.isNotBlank() && password.isNotBlank()
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = black,
+        unfocusedBorderColor = black,
+        focusedLabelColor = black,
+        unfocusedLabelColor = black,
+        cursorColor = black
+    )
 
-    fun submit() {
-        val u = trimmedUsername
-        val p = password
-        error = when {
-            u.isBlank() || p.isBlank() -> "Please enter username and password."
-            else -> null
-        }
-        if (error == null) onLogin(u, p)
-    }
+    val canLogin = email.trim().isNotBlank() && password.isNotBlank()
+
+    val isSuccessMessage = errorMessage?.contains("successfully", ignoreCase = true) == true
+    val messageColor = if (isSuccessMessage) Color(0xFF1B5E20) else MaterialTheme.colorScheme.error
+    val messageBackground = if (isSuccessMessage) Color(0xFFE8F5E9) else Color.Transparent
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center
+            .padding(horizontal = 24.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Image(
             painter = painterResource(id = R.drawable.chorepal_logo),
             contentDescription = "ChorePal Logo",
             modifier = Modifier
-                .fillMaxWidth(0.65f)
-                .height(150.dp)
-                .align(Alignment.CenterHorizontally),
+                .width(260.dp)
+                .height(120.dp),
             contentScale = ContentScale.Fit
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Text(
             text = "Sign in with your ChorePal account",
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            style = MaterialTheme.typography.titleMedium
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         OutlinedTextField(
-            value = username,
-            onValueChange = {
-                username = it
-                if (error != null) error = null
-            },
-            label = { Text("Username") },
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            ),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = black,
-                unfocusedBorderColor = black,
-                focusedLabelColor = black,
-                cursorColor = black
-            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            colors = fieldColors,
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = password,
-            onValueChange = {
-                password = it
-                if (error != null) error = null
-            },
+            onValueChange = { password = it },
             label = { Text("Password") },
             singleLine = true,
-            visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(onDone = { if (canSubmit) submit() }),
-            trailingIcon = {
-                TextButton(onClick = { showPassword = !showPassword }) {
-                    Text(if (showPassword) "Hide" else "Show")
-                }
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = black,
-                unfocusedBorderColor = black,
-                focusedLabelColor = black,
-                cursorColor = black
-            ),
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            colors = fieldColors,
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(8.dp))
+        if (!errorMessage.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(10.dp))
 
-        TextButton(
-            onClick = onForgotCredentials,
-            colors = ButtonDefaults.textButtonColors(contentColor = black),
-            modifier = Modifier.align(Alignment.End)
-        ) {
-            Text(
-                text = "Forgot username or password?",
-                fontWeight = FontWeight.Normal
-            )
+            Surface(
+                tonalElevation = 2.dp,
+                color = messageBackground,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = errorMessage,
+                    color = messageColor,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
         }
 
-        if (error != null) {
-            Text(text = error!!, color = MaterialTheme.colorScheme.error)
-            Spacer(Modifier.height(8.dp))
-        }
+        Spacer(modifier = Modifier.height(10.dp))
 
-        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Forgot email or password?",
+            modifier = Modifier.clickable { onForgotCredentials() }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { submit() },
-            enabled = canSubmit,
+            onClick = { onLogin(email.trim(), password) },
+            enabled = canLogin,
             colors = ButtonDefaults.buttonColors(
                 containerColor = black,
-                contentColor = white,
-                disabledContainerColor = black.copy(alpha = 0.5f),
-                disabledContentColor = white.copy(alpha = 0.9f)
+                contentColor = white
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Sign In")
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Don't have an account?",
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+        Text("Don’t have a primary parent account?")
 
-        Text(
-            text = "Register to manage kids' chores!",
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(Modifier.height(10.dp))
-
-        OutlinedButton(
+        Button(
             onClick = onRegister,
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = black),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = black,
+                contentColor = white
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Register")
+            Text("Create Primary Parent Account")
         }
     }
 }
+

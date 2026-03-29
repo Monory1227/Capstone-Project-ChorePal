@@ -1,22 +1,45 @@
 package com.example.chorepalcowboysg6
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,17 +48,18 @@ import androidx.compose.ui.unit.sp
 fun AddChildMemberScreen(
     onSave: (
         String, String, String, String, String,
-        String, String, String, String, String
+        String, String, String, String
     ) -> Unit,
     onBack: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    errorMessage: String? = null
 ) {
     MemberRegistrationScreen(
         memberTypeTitle = "Add Child Member",
-        requireEmail = false, // ✅ child has no email field
         onSave = onSave,
         onBack = onBack,
-        onLogout = onLogout
+        onLogout = onLogout,
+        errorMessage = errorMessage
     )
 }
 
@@ -43,34 +67,34 @@ fun AddChildMemberScreen(
 fun AddAdultMemberScreen(
     onSave: (
         String, String, String, String, String,
-        String, String, String, String, String
+        String, String, String, String
     ) -> Unit,
     onBack: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    errorMessage: String? = null
 ) {
     MemberRegistrationScreen(
         memberTypeTitle = "Add Adult Member",
-        requireEmail = true, // ✅ adult keeps email field
         onSave = onSave,
         onBack = onBack,
-        onLogout = onLogout
+        onLogout = onLogout,
+        errorMessage = errorMessage
     )
 }
 
 @Composable
 private fun MemberRegistrationScreen(
     memberTypeTitle: String,
-    requireEmail: Boolean,
     onSave: (
         String, String, String, String, String,
-        String, String, String, String, String
+        String, String, String, String
     ) -> Unit,
     onBack: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    errorMessage: String? = null
 ) {
     var firstName by rememberSaveable { mutableStateOf("") }
     var lastName by rememberSaveable { mutableStateOf("") }
-    var username by rememberSaveable { mutableStateOf("") }
     var dob by rememberSaveable { mutableStateOf("") }
 
     var streetAddress by rememberSaveable { mutableStateOf("") }
@@ -80,7 +104,6 @@ private fun MemberRegistrationScreen(
 
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-
     var acceptedTerms by rememberSaveable { mutableStateOf(false) }
 
     val black = Color.Black
@@ -90,22 +113,21 @@ private fun MemberRegistrationScreen(
         focusedBorderColor = black,
         unfocusedBorderColor = black,
         focusedLabelColor = black,
+        unfocusedLabelColor = black,
         cursorColor = black
     )
 
-    val requiredFilled =
-        firstName.isNotBlank() &&
-                lastName.isNotBlank() &&
-                username.isNotBlank() &&
-                dob.isNotBlank() &&
-                streetAddress.isNotBlank() &&
-                city.isNotBlank() &&
-                state.isNotBlank() &&
-                zip.isNotBlank() &&
+    val canSave =
+        firstName.trim().isNotBlank() &&
+                lastName.trim().isNotBlank() &&
+                dob.trim().isNotBlank() &&
+                streetAddress.trim().isNotBlank() &&
+                city.trim().isNotBlank() &&
+                state.trim().isNotBlank() &&
+                zip.trim().isNotBlank() &&
+                email.trim().isNotBlank() &&
                 password.isNotBlank() &&
-                (!requireEmail || email.isNotBlank())
-
-    val canSave = requiredFilled && acceptedTerms
+                acceptedTerms
 
     Scaffold { padding ->
         Column(
@@ -114,7 +136,6 @@ private fun MemberRegistrationScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // ---------- HEADER (MATCHES DASHBOARD) ----------
             Spacer(Modifier.height(8.dp))
 
             Box(
@@ -155,12 +176,12 @@ private fun MemberRegistrationScreen(
                 }
             }
 
-            // ---------- FORM ----------
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(bottom = 18.dp)
+                    .padding(bottom = 18.dp),
+                verticalArrangement = Arrangement.Top
             ) {
                 Text(
                     text = memberTypeTitle,
@@ -168,20 +189,41 @@ private fun MemberRegistrationScreen(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
+                if (!errorMessage.isNullOrBlank()) {
+                    Spacer(Modifier.height(10.dp))
+                    Surface(
+                        tonalElevation = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                }
+
                 Spacer(Modifier.height(12.dp))
 
-                OutlinedTextField(firstName, { firstName = it }, label = { Text("First Name") },
-                    singleLine = true, colors = fieldColors, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = firstName,
+                    onValueChange = { firstName = it },
+                    label = { Text("First Name") },
+                    singleLine = true,
+                    colors = fieldColors,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Spacer(Modifier.height(8.dp))
 
-                OutlinedTextField(lastName, { lastName = it }, label = { Text("Last Name") },
-                    singleLine = true, colors = fieldColors, modifier = Modifier.fillMaxWidth())
-
-                Spacer(Modifier.height(8.dp))
-
-                OutlinedTextField(username, { username = it }, label = { Text("Username") },
-                    singleLine = true, colors = fieldColors, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = lastName,
+                    onValueChange = { lastName = it },
+                    label = { Text("Last Name") },
+                    singleLine = true,
+                    colors = fieldColors,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Spacer(Modifier.height(8.dp))
 
@@ -191,25 +233,42 @@ private fun MemberRegistrationScreen(
                     label = { Text("DOB (MM/DD/YYYY)") },
                     singleLine = true,
                     colors = fieldColors,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(Modifier.height(8.dp))
 
-                OutlinedTextField(streetAddress, { streetAddress = it }, label = { Text("Address") },
-                    singleLine = true, colors = fieldColors, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = streetAddress,
+                    onValueChange = { streetAddress = it },
+                    label = { Text("Address") },
+                    singleLine = true,
+                    colors = fieldColors,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Spacer(Modifier.height(8.dp))
 
                 Row(Modifier.fillMaxWidth()) {
-                    OutlinedTextField(city, { city = it }, label = { Text("City") },
-                        singleLine = true, colors = fieldColors, modifier = Modifier.weight(1f))
+                    OutlinedTextField(
+                        value = city,
+                        onValueChange = { city = it },
+                        label = { Text("City") },
+                        singleLine = true,
+                        colors = fieldColors,
+                        modifier = Modifier.weight(1f)
+                    )
 
                     Spacer(Modifier.width(8.dp))
 
-                    OutlinedTextField(state, { state = it }, label = { Text("State") },
-                        singleLine = true, colors = fieldColors, modifier = Modifier.weight(1f))
+                    OutlinedTextField(
+                        value = state,
+                        onValueChange = { state = it },
+                        label = { Text("State") },
+                        singleLine = true,
+                        colors = fieldColors,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -220,26 +279,19 @@ private fun MemberRegistrationScreen(
                     label = { Text("Zip Code") },
                     singleLine = true,
                     colors = fieldColors,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // ✅ Email only for Adult
-                if (requireEmail) {
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email") },
-                        singleLine = true,
-                        colors = fieldColors,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                } else {
-                    // Child: always blank email
-                    email = ""
-                }
+                Spacer(Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    singleLine = true,
+                    colors = fieldColors,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Spacer(Modifier.height(8.dp))
 
@@ -255,7 +307,6 @@ private fun MemberRegistrationScreen(
 
                 Spacer(Modifier.height(10.dp))
 
-                // ✅ Terms checkbox for BOTH
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = acceptedTerms,
@@ -276,7 +327,6 @@ private fun MemberRegistrationScreen(
                         onSave(
                             firstName.trim(),
                             lastName.trim(),
-                            username.trim(),
                             dob.trim(),
                             streetAddress.trim(),
                             city.trim(),
@@ -289,9 +339,7 @@ private fun MemberRegistrationScreen(
                     enabled = canSave,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = black,
-                        contentColor = white,
-                        disabledContainerColor = black.copy(alpha = 0.5f),
-                        disabledContentColor = white
+                        contentColor = white
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -302,7 +350,6 @@ private fun MemberRegistrationScreen(
 
                 OutlinedButton(
                     onClick = onBack,
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = black),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Cancel")
