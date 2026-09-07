@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -53,88 +54,189 @@ fun ChildDashboardScreen(
     onActionSelected: (ChildAction) -> Unit,
     onLogout: () -> Unit
 ) {
-    Scaffold(
-        bottomBar = {
-            ChildBottomMenuBar(
-                selectedAction = selectedAction,
-                onActionSelected = onActionSelected
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-        ) {
-            Spacer(Modifier.height(8.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            ) {
-                IconButton(
-                    onClick = { onActionSelected(ChildAction.PROFILE) },
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = "Profile",
-                        modifier = Modifier.size(34.dp)
-                    )
-                }
+    KidsBackground {
 
-                Image(
-                    painter = painterResource(id = R.drawable.chorepal_logo),
-                    contentDescription = "ChorePal Logo",
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .width(280.dp)
-                        .height(110.dp),
-                    contentScale = ContentScale.Fit
+        Scaffold(
+            containerColor = Color.Transparent,
+
+            bottomBar = {
+                ChildBottomMenuBar(
+                    selectedAction = selectedAction,
+                    onActionSelected = onActionSelected
                 )
-
-                IconButton(
-                    onClick = onLogout,
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                        contentDescription = "Logout",
-                        modifier = Modifier.size(34.dp)
-                    )
-                }
             }
 
-            Spacer(Modifier.height(8.dp))
+        ) { padding ->
 
-            Text(
-                text = "Welcome, $firstName!",
-                fontSize = 16.sp,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+            ) {
 
-            Spacer(Modifier.height(20.dp))
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
 
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    ChildTile("View Chores", Icons.Filled.List, Modifier.weight(1f)) {
-                        onActionSelected(ChildAction.VIEW_CHORES)
+                /*
+                 Header
+                 Profile button - Logo - Logout button
+                 */
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                ) {
+
+                    // Profile
+                    IconButton(
+                        onClick = {
+                            onActionSelected(
+                                ChildAction.PROFILE
+                            )
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 8.dp)
+                    ) {
+
+                        Icon(
+                            imageVector =
+                                Icons.Filled.Person,
+                            contentDescription =
+                                "Profile",
+                            modifier =
+                                Modifier.size(34.dp)
+                        )
                     }
-                    ChildTile("Update Status", Icons.Filled.CheckCircle, Modifier.weight(1f)) {
-                        onActionSelected(ChildAction.UPDATE_STATUS)
+
+                    // Existing ChorePal logo
+                    Image(
+                        painter = painterResource(
+                            id = R.drawable.chorepal_logo
+                        ),
+                        contentDescription =
+                            "ChorePal Logo",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .width(280.dp)
+                            .height(110.dp),
+                        contentScale =
+                            ContentScale.Fit
+                    )
+
+                    // Logout
+                    IconButton(
+                        onClick = onLogout,
+                        modifier =
+                            Modifier.align(
+                                Alignment.CenterEnd
+                            )
+                    ) {
+
+                        Icon(
+                            imageVector =
+                                Icons.AutoMirrored
+                                    .Filled
+                                    .ExitToApp,
+                            contentDescription =
+                                "Logout",
+                            modifier =
+                                Modifier.size(34.dp)
+                        )
                     }
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    ChildTile("Rewards", Icons.Filled.Star, Modifier.weight(1f)) {
-                        onActionSelected(ChildAction.REWARDS)
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+                /*
+                 Welcome message
+                 */
+                Text(
+                    text = "Welcome, $firstName!",
+                    fontSize = 18.sp,
+                    modifier =
+                        Modifier.align(
+                            Alignment.CenterHorizontally
+                        )
+                )
+
+                Spacer(
+                    modifier = Modifier.height(20.dp)
+                )
+
+                /*
+                 Dashboard buttons
+                 */
+                Column(
+                    verticalArrangement =
+                        Arrangement.spacedBy(12.dp)
+                ) {
+
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth(),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(12.dp)
+                    ) {
+
+                        ChildTile(
+                            title = "View Chores",
+                            icon = Icons.Filled.List,
+                            modifier =
+                                Modifier.weight(1f)
+                        ) {
+                            onActionSelected(
+                                ChildAction.VIEW_CHORES
+                            )
+                        }
+
+                        ChildTile(
+                            title = "Update Status",
+                            icon =
+                                Icons.Filled.CheckCircle,
+                            modifier =
+                                Modifier.weight(1f)
+                        ) {
+                            onActionSelected(
+                                ChildAction.UPDATE_STATUS
+                            )
+                        }
                     }
-                    ChildTile("Profile", Icons.Filled.Person, Modifier.weight(1f)) {
-                        onActionSelected(ChildAction.PROFILE)
+
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth(),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(12.dp)
+                    ) {
+
+                        ChildTile(
+                            title = "Rewards",
+                            icon = Icons.Filled.Star,
+                            modifier =
+                                Modifier.weight(1f)
+                        ) {
+                            onActionSelected(
+                                ChildAction.REWARDS
+                            )
+                        }
+
+                        ChildTile(
+                            title = "Profile",
+                            icon =
+                                Icons.Filled.Person,
+                            modifier =
+                                Modifier.weight(1f)
+                        ) {
+                            onActionSelected(
+                                ChildAction.PROFILE
+                            )
+                        }
                     }
                 }
             }
@@ -149,20 +251,43 @@ private fun ChildTile(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+
     Card(
         modifier = modifier
             .height(120.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp)
+            .clickable(
+                onClick = onClick
+            ),
+        shape =
+            RoundedCornerShape(16.dp)
     ) {
+
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                Modifier.fillMaxSize(),
+            verticalArrangement =
+                Arrangement.Center,
+            horizontalAlignment =
+                Alignment.CenterHorizontally
         ) {
-            Icon(icon, contentDescription = title, modifier = Modifier.size(36.dp))
-            Spacer(Modifier.height(8.dp))
-            Text(text = title, textAlign = TextAlign.Center)
+
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                modifier =
+                    Modifier.size(36.dp)
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(8.dp)
+            )
+
+            Text(
+                text = title,
+                textAlign =
+                    TextAlign.Center
+            )
         }
     }
 }
@@ -172,36 +297,124 @@ private fun ChildBottomMenuBar(
     selectedAction: ChildAction,
     onActionSelected: (ChildAction) -> Unit
 ) {
+
     NavigationBar {
+
         NavigationBarItem(
-            selected = selectedAction == ChildAction.HOME,
-            onClick = { onActionSelected(ChildAction.HOME) },
-            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+            selected =
+                selectedAction ==
+                        ChildAction.HOME,
+
+            onClick = {
+                onActionSelected(
+                    ChildAction.HOME
+                )
+            },
+
+            icon = {
+                Icon(
+                    imageVector =
+                        Icons.Filled.Home,
+                    contentDescription =
+                        "Home"
+                )
+            },
+
             label = null
         )
+
         NavigationBarItem(
-            selected = selectedAction == ChildAction.VIEW_CHORES,
-            onClick = { onActionSelected(ChildAction.VIEW_CHORES) },
-            icon = { Icon(Icons.Filled.List, contentDescription = "View Chores") },
+            selected =
+                selectedAction ==
+                        ChildAction.VIEW_CHORES,
+
+            onClick = {
+                onActionSelected(
+                    ChildAction.VIEW_CHORES
+                )
+            },
+
+            icon = {
+                Icon(
+                    imageVector =
+                        Icons.Filled.List,
+                    contentDescription =
+                        "View Chores"
+                )
+            },
+
             label = null
         )
+
         NavigationBarItem(
-            selected = selectedAction == ChildAction.UPDATE_STATUS,
-            onClick = { onActionSelected(ChildAction.UPDATE_STATUS) },
-            icon = { Icon(Icons.Filled.CheckCircle, contentDescription = "Update Status") },
+            selected =
+                selectedAction ==
+                        ChildAction.UPDATE_STATUS,
+
+            onClick = {
+                onActionSelected(
+                    ChildAction.UPDATE_STATUS
+                )
+            },
+
+            icon = {
+                Icon(
+                    imageVector =
+                        Icons.Filled.CheckCircle,
+                    contentDescription =
+                        "Update Status"
+                )
+            },
+
             label = null
         )
+
         NavigationBarItem(
-            selected = selectedAction == ChildAction.REWARDS,
-            onClick = { onActionSelected(ChildAction.REWARDS) },
-            icon = { Icon(Icons.Filled.Star, contentDescription = "Rewards") },
+            selected =
+                selectedAction ==
+                        ChildAction.REWARDS,
+
+            onClick = {
+                onActionSelected(
+                    ChildAction.REWARDS
+                )
+            },
+
+            icon = {
+                Icon(
+                    imageVector =
+                        Icons.Filled.Star,
+                    contentDescription =
+                        "Rewards"
+                )
+            },
+
             label = null
         )
+
         NavigationBarItem(
-            selected = selectedAction == ChildAction.PROFILE,
-            onClick = { onActionSelected(ChildAction.PROFILE) },
-            icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
+            selected =
+                selectedAction ==
+                        ChildAction.PROFILE,
+
+            onClick = {
+                onActionSelected(
+                    ChildAction.PROFILE
+                )
+            },
+
+            icon = {
+                Icon(
+                    imageVector =
+                        Icons.Filled.Person,
+                    contentDescription =
+                        "Profile"
+                )
+            },
+
             label = null
         )
     }
 }
+
+

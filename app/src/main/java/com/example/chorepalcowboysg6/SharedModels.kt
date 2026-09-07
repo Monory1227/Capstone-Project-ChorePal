@@ -29,7 +29,16 @@ data class ChoreRow(
     val createdByName: String = "",
     val createdByRole: String = "",
     val householdId: String = "",
-    val status: String = "OPEN"
+    val status: String = "OPEN",
+
+    val photoUrl: String = "",
+    val photoStoragePath: String = "",
+    val aiComplete: Boolean? = null,
+    val aiConfidence: Double = 0.0,
+    val aiAnalysis: String = "",
+    val aiIssues: List<String> = emptyList(),
+    val aiStatus: String = ""
+
 )
 
 fun formatRole(role: String): String {

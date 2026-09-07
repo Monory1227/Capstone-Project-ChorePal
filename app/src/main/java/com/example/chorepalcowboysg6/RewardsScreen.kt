@@ -1,45 +1,24 @@
 package com.example.chorepalcowboysg6
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun RewardsScreen(
@@ -48,173 +27,525 @@ fun RewardsScreen(
     chores: List<ChoreRow>,
     children: List<HouseholdMemberRow>,
     onBack: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    isKidsMode: Boolean = false
 ) {
-    val black = Color.Black
-    val white = Color.White
 
-    val approvedChores = chores.filter { it.status.uppercase() == "APPROVED" }
+    val role = currentRole.uppercase()
 
-    var selectedChildUid by rememberSaveable {
+    var selectedChildUid by remember(
+        currentUserUid,
+        children,
+        role
+    ) {
         mutableStateOf(
-            if (currentRole == "CHILD") currentUserUid else ""
+            if (role == "CHILD") {
+                currentUserUid
+            } else {
+                children.firstOrNull()?.uid.orEmpty()
+            }
         )
     }
-    var selectedChildName by rememberSaveable { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
 
-    if (currentRole == "CHILD" && selectedChildUid.isBlank()) {
-        selectedChildUid = currentUserUid
-    }
+    /*
+    =========================================================
+    SELECT CHORES FOR CURRENT CHILD
+    =========================================================
+    */
 
-    val displayedChores = if (currentRole == "CHILD") {
-        approvedChores.filter { it.assignedChildUid == currentUserUid }
-    } else {
-        approvedChores.filter { it.assignedChildUid == selectedChildUid }
-    }
+    val selectedChores =
+        if (role == "CHILD") {
 
-    val totalEarned = displayedChores.sumOf { it.rewardAmount.toDoubleOrNull() ?: 0.0 }
-
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(34.dp)
-                    )
-                }
-
-                Image(
-                    painter = painterResource(id = R.drawable.chorepal_logo),
-                    contentDescription = "ChorePal Logo",
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .width(280.dp)
-                        .height(110.dp),
-                    contentScale = ContentScale.Fit
-                )
-
-                IconButton(
-                    onClick = onLogout,
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                        contentDescription = "Logout",
-                        modifier = Modifier.size(34.dp)
-                    )
-                }
+            chores.filter {
+                it.assignedChildUid == currentUserUid
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+        } else {
 
-            Text(
-                text = "Rewards",
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            chores.filter {
+                it.assignedChildUid == selectedChildUid
+            }
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
 
-            if (currentRole == "PARENT" || currentRole == "ADULT") {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = selectedChildName,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Select Child") },
-                        placeholder = { Text("Choose a child") },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = black,
-                            unfocusedBorderColor = black,
-                            focusedLabelColor = black,
-                            unfocusedLabelColor = black,
-                            cursorColor = black
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
+    /*
+    =========================================================
+    ONLY APPROVED CHORES EARN MONEY
+    =========================================================
 
-                    Button(
-                        onClick = { expanded = true },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = black,
-                            contentColor = white
-                        ),
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 8.dp)
+    COMPLETED does NOT count as money earned.
+
+    APPROVED means the parent has approved the completed chore,
+    so the reward can now be added to Total Earned.
+    */
+
+    val approvedChores =
+        selectedChores.filter {
+            it.status
+                .trim()
+                .uppercase() == "APPROVED"
+        }
+
+
+    /*
+    =========================================================
+    TOTAL EARNED
+    =========================================================
+    */
+
+    val totalEarned =
+        approvedChores.sumOf { chore ->
+            chore.rewardAmount.toDoubleOrNull() ?: 0.0
+        }
+
+
+    ChorePalScreenBackground(
+        isKidsMode = isKidsMode
+    ) {
+
+        Scaffold(
+            containerColor =
+                if (isKidsMode) {
+                    Color.Transparent
+                } else {
+                    MaterialTheme.colorScheme.background
+                }
+        ) { padding ->
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+            ) {
+
+                Spacer(
+                    Modifier.height(8.dp)
+                )
+
+
+                /*
+                =====================================================
+                HEADER
+                =====================================================
+                */
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                ) {
+
+                    /*
+                    BACK BUTTON
+                    */
+
+                    IconButton(
+                        onClick = onBack,
+                        modifier =
+                            Modifier.align(
+                                Alignment.CenterStart
+                            )
                     ) {
-                        Text("Select")
+
+                        Icon(
+                            imageVector =
+                                Icons.AutoMirrored.Filled.ArrowBack,
+
+                            contentDescription =
+                                "Back",
+
+                            modifier =
+                                Modifier.size(34.dp)
+                        )
                     }
 
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        children.forEach { child ->
-                            DropdownMenuItem(
-                                text = { Text("${child.firstName} ${child.lastName}") },
-                                onClick = {
-                                    selectedChildUid = child.uid
-                                    selectedChildName = "${child.firstName} ${child.lastName}"
-                                    expanded = false
-                                }
+
+                    /*
+                    CHOREPAL LOGO
+                    */
+
+                    Image(
+                        painter =
+                            painterResource(
+                                id = R.drawable.chorepal_logo
+                            ),
+
+                        contentDescription =
+                            "ChorePal Logo",
+
+                        modifier =
+                            Modifier
+                                .align(Alignment.Center)
+                                .width(280.dp)
+                                .height(110.dp),
+
+                        contentScale =
+                            ContentScale.Fit
+                    )
+
+
+                    /*
+                    LOGOUT BUTTON
+                    */
+
+                    IconButton(
+                        onClick = onLogout,
+                        modifier =
+                            Modifier.align(
+                                Alignment.CenterEnd
                             )
+                    ) {
+
+                        Icon(
+                            imageVector =
+                                Icons.AutoMirrored.Filled.ExitToApp,
+
+                            contentDescription =
+                                "Logout",
+
+                            modifier =
+                                Modifier.size(34.dp)
+                        )
+                    }
+                }
+
+
+                /*
+                =====================================================
+                TITLE
+                =====================================================
+                */
+
+                Text(
+                    text = "Rewards",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier =
+                        Modifier.align(
+                            Alignment.CenterHorizontally
+                        )
+                )
+
+                Spacer(
+                    Modifier.height(16.dp)
+                )
+
+
+                /*
+                =====================================================
+                PARENT / ADULT CHILD SELECTOR
+                =====================================================
+                */
+
+                if (
+                    role == "PARENT" ||
+                    role == "ADULT"
+                ) {
+
+                    Text(
+                        text = "Select Child",
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(
+                        Modifier.height(8.dp)
+                    )
+
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth(),
+
+                        horizontalArrangement =
+                            Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        children.forEach { child ->
+
+                            Card(
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .clickable {
+
+                                            selectedChildUid =
+                                                child.uid
+                                        },
+
+                                colors =
+                                    CardDefaults.cardColors(
+                                        containerColor =
+                                            if (
+                                                selectedChildUid ==
+                                                child.uid
+                                            ) {
+
+                                                MaterialTheme
+                                                    .colorScheme
+                                                    .primaryContainer
+
+                                            } else {
+
+                                                MaterialTheme
+                                                    .colorScheme
+                                                    .surface
+                                            }
+                                    )
+                            ) {
+
+                                Text(
+                                    text =
+                                        "${child.firstName} ${child.lastName}",
+
+                                    modifier =
+                                        Modifier.padding(12.dp)
+                                )
+                            }
                         }
                     }
+
+                    Spacer(
+                        Modifier.height(16.dp)
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-            }
 
-            Text(
-                text = "Total Earned: $${"%.2f".format(totalEarned)}"
-            )
+                /*
+                =====================================================
+                TOTAL EARNED CARD
+                =====================================================
+                */
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Card(
+                    modifier =
+                        Modifier.fillMaxWidth(),
 
-            if (displayedChores.isEmpty()) {
-                Text(
-                    text = if (currentRole == "CHILD") {
-                        "No approved chores yet."
-                    } else {
-                        "No approved chores for the selected child."
-                    },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(bottom = 12.dp)
+                    shape =
+                        RoundedCornerShape(22.dp),
+
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor =
+                                if (isKidsMode) {
+
+                                    Color.White.copy(
+                                        alpha = 0.92f
+                                    )
+
+                                } else {
+
+                                    MaterialTheme
+                                        .colorScheme
+                                        .surface
+                                }
+                        )
                 ) {
-                    items(displayedChores, key = { it.id }) { chore ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(14.dp)
+
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+
+                        horizontalAlignment =
+                            Alignment.CenterHorizontally
+                    ) {
+
+                        if (isKidsMode) {
+
+                            Text(
+                                text = "⭐",
+                                fontSize = 36.sp
+                            )
+                        }
+
+                        Text(
+                            text = "Total Earned",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(
+                            Modifier.height(6.dp)
+                        )
+
+                        Text(
+                            text =
+                                "$%.2f".format(totalEarned),
+
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+
+                Spacer(
+                    Modifier.height(16.dp)
+                )
+
+
+                /*
+                =====================================================
+                APPROVED CHORES
+                =====================================================
+                */
+
+                Text(
+                    text = "Approved Chores",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(
+                    Modifier.height(8.dp)
+                )
+
+
+                /*
+                =====================================================
+                NO APPROVED CHORES
+                =====================================================
+                */
+
+                if (approvedChores.isEmpty()) {
+
+                    Card(
+                        modifier =
+                            Modifier.fillMaxWidth(),
+
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor =
+                                    if (isKidsMode) {
+
+                                        Color.White.copy(
+                                            alpha = 0.90f
+                                        )
+
+                                    } else {
+
+                                        MaterialTheme
+                                            .colorScheme
+                                            .surface
+                                    }
+                            )
+                    ) {
+
+                        Text(
+                            text =
+                                "No approved chores yet.",
+
+                            modifier =
+                                Modifier.padding(20.dp)
+                        )
+                    }
+
+
+                } else {
+
+
+                    /*
+                    =================================================
+                    APPROVED CHORE LIST
+                    =================================================
+                    */
+
+                    LazyColumn(
+                        modifier =
+                            Modifier.fillMaxSize(),
+
+                        verticalArrangement =
+                            Arrangement.spacedBy(10.dp)
+                    ) {
+
+                        items(
+                            items = approvedChores,
+                            key = { chore -> chore.id }
+                        ) { chore ->
+
+                            Card(
+                                modifier =
+                                    Modifier.fillMaxWidth(),
+
+                                shape =
+                                    RoundedCornerShape(18.dp),
+
+                                colors =
+                                    CardDefaults.cardColors(
+                                        containerColor =
+                                            if (isKidsMode) {
+
+                                                Color.White.copy(
+                                                    alpha = 0.90f
+                                                )
+
+                                            } else {
+
+                                                MaterialTheme
+                                                    .colorScheme
+                                                    .surface
+                                            }
+                                    )
                             ) {
-                                Text(text = chore.title)
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(text = "Reward Earned: $${chore.rewardAmount}")
-                                Text(text = "Status: ${chore.status}")
+
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp)
+                                ) {
+
+                                    /*
+                                    CHORE TITLE
+                                    */
+
+                                    Text(
+                                        text = chore.title,
+                                        fontSize = 17.sp,
+                                        fontWeight =
+                                            FontWeight.Bold
+                                    )
+
+
+                                    Spacer(
+                                        Modifier.height(4.dp)
+                                    )
+
+
+                                    /*
+                                    REWARD
+                                    */
+
+                                    Text(
+                                        text =
+                                            "Reward: $${chore.rewardAmount}"
+                                    )
+
+
+                                    /*
+                                    STATUS
+                                    */
+
+                                    Text(
+                                        text =
+                                            "Status: ${chore.status}"
+                                    )
+                                }
                             }
+                        }
+
+
+                        /*
+                        BOTTOM SPACING
+                        */
+
+                        item {
+
+                            Spacer(
+                                modifier =
+                                    Modifier.height(170.dp)
+                            )
                         }
                     }
                 }
