@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -285,7 +286,8 @@ fun PhotoSubmissionScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(300.dp)
+                            .height(300.dp),
+                        colors = CardDefaults.cardColors(containerColor = white)
                     ) {
 
                         AsyncImage(
@@ -308,7 +310,8 @@ fun PhotoSubmissionScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp)
+                            .height(250.dp),
+                        colors = CardDefaults.cardColors(containerColor = white)
                     ) {
 
                         Column(
@@ -521,5 +524,3 @@ fun PhotoSubmissionScreen(
         }
     }
 }
-
-
